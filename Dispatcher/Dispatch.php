@@ -30,9 +30,11 @@ class Dispatch
             $pattern = "~^{$k}$~";
 
             if (preg_match($pattern, $uri, $data_value)) {
+                // deleta a primeira chaves do array.
                 array_shift($data_value);
 
                 preg_match_all('~{([\w-]+)}~', $current->route, $data_key, PREG_PATTERN_ORDER);
+                // deleta a primeira chave do array.
                 array_shift($data_key);
 
                 $routes[$method][$k]->data = array_combine($data_key[0], $data_value);
@@ -48,6 +50,7 @@ class Dispatch
             return false;
         }
 
+        // retorna apenas o conteúdo do array sem a chave.
         $route = reset($route);
 
         $controller = "{$route->namespace}\\{$route->controller}";
