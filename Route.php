@@ -2,11 +2,13 @@
 
 namespace Brisa;
 
+use Brisa\Pathfinder\Metadata;
 use Closure;
 
-class Route
+class Route extends ExtendRoute
 {
-    use ExtendRoute;
+    use TraitRoute;
+    use Metadata;
 
     /**
      * Construtor da classe.
@@ -22,11 +24,11 @@ class Route
         $route = rtrim($route, '/');
         $route = !self::$group ? $route : self::$group . $route;
 
-        $route_key = preg_replace('~{[\w-]+}~', '([\w-]+)', $route);
+        $route_key = self::createPattern($route);
 
         [$controller, $action] = explode(':', $handler);
 
-        self::$routes[$method][$route_key] = (object) [
+        $temp_route = [
             'route' => $route,
             'name' => $name,
             'namespace' => self::$namespace,
@@ -34,6 +36,14 @@ class Route
             'action' => $action,
             'data' => []
         ];
+
+        if (count(self::$metadata) > 0) {
+            $temp_route['metadata'] = (object) self::$metadata;
+        }
+
+        self::$routes[$method][$route_key] = (object) $temp_route;
+
+        unset(self::$metadata['display']);
 
         self::$last_route = [
             'method' => $method,

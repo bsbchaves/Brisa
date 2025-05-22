@@ -5,19 +5,20 @@ namespace Brisa;
 use Closure;
 use stdClass;
 
-trait ExtendRoute
+abstract class ExtendRoute
 {
-    /** @var null|string */
-    private static null|string $namespace = null;
 
     /** @var array */
-    private static array $routes;
+    protected static array $routes;
 
     /** @var null|string */
-    private static null|string $group = null;
-    
+    protected static null|string $namespace = null;
+
+    /** @var null|string */
+    protected static null|string $group = null;
+
     /** @var array */
-    private static array $last_route;
+    protected static array $last_route;
 
     /**
      * Retorna o array de rotas.
@@ -27,6 +28,20 @@ trait ExtendRoute
     public static function routes(): array
     {
         return self::$routes;
+    }
+
+    public static function getRoute(string $name, array $data = []): string
+    {
+        $routes = self::$routes;
+
+        foreach ($routes as $content) {
+            foreach ($content as $value) {
+                if ($value->name === $name) {
+                    return $value->route;
+                }
+            }
+        }
+        return "{{$name}}";
     }
 
     /**
@@ -89,9 +104,8 @@ trait ExtendRoute
         return;
     }
 
-    public static function addRoutesItem(string $item): void
+    public static function createPattern(string $subject): string
     {
-        $content = (array) self::$routes[self::$last_route['method']][self::$last_route['route']];
-        self::$routes[self::$last_route['method']][self::$last_route['route']] = (object) array_merge($content, [$item => new stdClass]);
+        return preg_replace('~{[\w-]+}~', '([\w-]+)', $subject);
     }
 }
